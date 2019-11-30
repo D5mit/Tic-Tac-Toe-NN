@@ -20,7 +20,7 @@ nrOfSWins = 0
 nrOfLWins = 0
 
 
-#test
+#test 123
 # Global varables Keras
 from keras.models import Sequential
 from keras.layers import Dense
