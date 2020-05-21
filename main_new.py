@@ -211,6 +211,7 @@ def saveWinner(let, GameNr, xPlayer, oPlayer):
     i = 0
 
     if (let == 'O' and oPlayer == 'U') or (let == 'X' and xPlayer == 'U'):
+
         # save the winner in the list
         while i < len(movesHist):
             if GameNr == movesHist[i]['GameNr']:
@@ -238,6 +239,7 @@ def saveWinner(let, GameNr, xPlayer, oPlayer):
             # append this 10times.                  # this is a loosing move and should be penalised
             allWinningMovesHist.append(improveMove)
             allWinningMovesHist.append(improveMove)
+
 
     # save the number of wins
     if let == 'X':
@@ -278,6 +280,7 @@ def saveWinner(let, GameNr, xPlayer, oPlayer):
 def makePrediction(iboard, mode):
 
     prednr = 0
+    gamma = 4
     iX = np.zeros((1, 18), dtype=int)
     iX[0] = np.array(boardToX(iboard))
 
@@ -287,12 +290,35 @@ def makePrediction(iboard, mode):
     #ynew = model.predict_proba(iX)
     if mode == '9' or mode == '10':
         ynew = loaded_modelL.predict_proba(iX)
-        if np.sum(iX[0]) == 0:
-            ynew = np.random.multinomial(1, ynew[0])
+        # if np.sum(iX[0]) == 0:
+        #     ynew = np.random.multinomial(1, ynew[0])
+        print(np.around(ynew, decimals=3))
+        # ynew = np.random.multinomial(1, ynew[0])
+
+        ynew[0] = ynew[0] ** gamma / np.sum(ynew[0] ** gamma)
+        ynew[0] = np.around(ynew[0].astype(float), decimals=3)
+        ynew[0] /= ynew[0].sum()
+
+        print(ynew[0])
+        print(ynew[0].sum())
+        ynew = np.random.multinomial(1, ynew[0])
+
+
     else:
-        ynew = loaded_modelS.predict_proba(iX)
-        if np.sum(iX[0]) == 0:
-            ynew = np.random.multinomial(1, ynew[0])
+        ynew = loaded_modelS.predict_proba(iX)              # if np.sum(iX[0]) == 0:
+        #     ynew = np.random.multinomial(1, ynew[0])
+        print(np.around(ynew, decimals=3))
+
+        ynew[0] = ynew[0] ** gamma / np.sum(ynew[0] ** gamma)
+        ynew[0] = np.around(ynew[0].astype(float), decimals=3)
+        ynew[0] /= ynew[0].sum()
+
+        print(ynew[0])
+        print(ynew[0].sum())
+
+        # ynew = np.random.multinomial(1, ynew[0])
+        ynew = np.random.multinomial(1, ynew[0])
+
     if pBoard == 'y' or pBoard == 'Y':
         print(np.around(ynew, decimals=3))
 
