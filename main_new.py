@@ -210,13 +210,15 @@ def saveWinner(let, GameNr, xPlayer, oPlayer):
 
     i = 0
 
-    if (let == 'O' and oPlayer == 'U') or (let == 'X' and xPlayer == 'U'):
+    if (let == 'O' and (oPlayer == 'U' or oPlayer == 'S')) or (let == 'X' and (xPlayer == 'U' or oPlayer == 'S')):
+    # if (let == 'O' and oPlayer == 'U') or (let == 'X' and xPlayer == 'U'):
 
         # save the winner in the list
         while i < len(movesHist):
             if GameNr == movesHist[i]['GameNr']:
                 movesHist[i]['Winner'] = let
                 allMovesHist.append(movesHist[i])
+
                 if movesHist[i]['Player'] == let:
                     allWinningMovesHist.append(movesHist[i])
 
@@ -292,31 +294,25 @@ def makePrediction(iboard, mode):
         ynew = loaded_modelL.predict_proba(iX)
         # if np.sum(iX[0]) == 0:
         #     ynew = np.random.multinomial(1, ynew[0])
-        print(np.around(ynew, decimals=3))
         # ynew = np.random.multinomial(1, ynew[0])
 
         ynew[0] = ynew[0] ** gamma / np.sum(ynew[0] ** gamma)
         ynew[0] = np.around(ynew[0].astype(float), decimals=3)
         ynew[0] /= ynew[0].sum()
 
-        print(ynew[0])
-        print(ynew[0].sum())
+        ynew[0] = ynew[0] * 0.95
         ynew = np.random.multinomial(1, ynew[0])
 
 
     else:
         ynew = loaded_modelS.predict_proba(iX)              # if np.sum(iX[0]) == 0:
         #     ynew = np.random.multinomial(1, ynew[0])
-        print(np.around(ynew, decimals=3))
 
         ynew[0] = ynew[0] ** gamma / np.sum(ynew[0] ** gamma)
         ynew[0] = np.around(ynew[0].astype(float), decimals=3)
         ynew[0] /= ynew[0].sum()
 
-        print(ynew[0])
-        print(ynew[0].sum())
-
-        # ynew = np.random.multinomial(1, ynew[0])
+        ynew[0] = ynew[0] * 0.95
         ynew = np.random.multinomial(1, ynew[0])
 
     if pBoard == 'y' or pBoard == 'Y':
@@ -492,6 +488,7 @@ def GameStats(gameNr, gameMode):
 
 #   print out X and y training data to file
     print('Prep X and y...')
+
     iX = np.zeros((len(allWinningMovesHist), 18), dtype=int)
     iY = np.zeros((len(allWinningMovesHist), 9), dtype=int)
     i = 0
@@ -590,7 +587,7 @@ def enterTraining(gameMode):
         print('Evaluate Model')
         score = model.evaluate(X_test, y_test, verbose=0)
 
-    print(score)
+        print(score)
 
     # save the model
     # serialize model to JSON
@@ -678,7 +675,7 @@ if gameMode != '4' and gameMode != '8':
             i = i + 1
             enterGame(gameMode, player2, player1, i, '3')      # swap x an o players
 
-        if ((i/100000).is_integer() and i != 0) or i == int(gameNr):
+        if ((i/10000).is_integer() and i != 0) or i == int(gameNr):
             print(str(i) + ' games played...')
 
     GameStats(gameNr, gameMode)
